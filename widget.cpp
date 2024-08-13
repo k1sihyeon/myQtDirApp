@@ -43,7 +43,29 @@ Widget::Widget(QWidget *parent)
     menu->addSeparator();
     menu->addAction(quitAct);
 
+    // define widgets
+    dirListWidget = new QListWidget(this);
+    filenameLineEdit = new QLineEdit(this);
+    outputEdit = new QTextEdit(this);
+    outputEdit->setReadOnly(true);
 
+    //define button, layout
+    QPushButton* actionButton = new QPushButton("Action", this);
+    actionButton->setMenu(menu);
+
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->addWidget(dirListWidget);
+    layout->addWidget(filenameLineEdit);
+    layout->addWidget(actionButton);
+    layout->addWidget(outputEdit);
+
+    // connect widgets
+    connect(dirListWidget, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(selectItem(QListWidgetItem*)));
+    connect(dirListWidget, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(changeDir()));
+    //changeDir slot에 QListWidgetItem을 같이 넘겨줘도 ok
+
+    refreshDir();
+    // show
 }
 
 Widget::~Widget() {}
