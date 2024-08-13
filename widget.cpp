@@ -13,6 +13,7 @@
 #include <QApplication>
 #include <QMessageBox>
 #include <QTextStream>
+#include <QProcess>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -113,6 +114,20 @@ void Widget::changeDir() {
         dir->cd(filename);
         dir->refresh();
         refreshDir();
+    }
+    else if (check.isExecutable()) {
+        QProcess cmd;
+        QStringList arg;
+        cmd.start(filename, arg);
+
+        outputEdit->clear();
+        if (!cmd.waitForStarted()) return;
+        QByteArray result = cmd.readAllStandardOutput();
+        outputEdit->append(result);
+
+        if (!cmd.waitForFinished()) return;
+        result = cmd.readAllStandardOutput();
+        outputEdit->append(result);
     }
     else if (check.isFile()) {
         if (check.isReadable()) {
