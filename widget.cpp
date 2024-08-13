@@ -11,6 +11,8 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QApplication>
+#include <QMessageBox>
+#include <QTextStream>
 
 Widget::Widget(QWidget *parent)
     : QWidget(parent)
@@ -88,7 +90,12 @@ void Widget::cpFile() {
     if (check.isFile() && filenameLineEdit->text().length()) {
         QString newFile = dir->absoluteFilePath(filenameLineEdit->text());
 
-        if (filename != newFile)
+
+        if (filename == newFile) {
+            QMessageBox::warning(this, "Error", "New file name is same as Existing file");
+            filenameLineEdit->clear();
+        }
+        else
             QFile::copy(filename, newFile);
             //qfile static 멤버 함수 -> singleton?
     }
@@ -97,6 +104,7 @@ void Widget::cpFile() {
     refreshDir();
 }
 
+// double click slot
 void Widget::changeDir() {
     QString filename = dir->absoluteFilePath(dirListWidget->currentItem()->text());
     QFileInfo check(filename);
@@ -106,10 +114,28 @@ void Widget::changeDir() {
         dir->refresh();
         refreshDir();
     }
+    else if (check.isFile()) {
+        if (check.isReadable()) {
+            QFile file(filename);
+            file.open(QFile::ReadOnly);
+            QTextStream in(&file);
+
+            outputEdit->setWindowTitle(filename);
+            outputEdit->clear();
+
+            QString line;
+            while (in.readLineInto(&line))
+                outputEdit->append(line);
+
+            file.close();
+        }
+        else
+            QMessageBox::warning(this, "Error", "Cannot Read this file");
+    }
 }
 
 void Widget::mkDir() {
-    if ((filenameLineEdit->text().length() > 0) && (dirListWidget->currentItem() != NULL)) {
+    if (filenameLineEdit->text().length() > 0) {
         dir->mkdir(filenameLineEdit->text());
         dir->refresh();
         refreshDir();
