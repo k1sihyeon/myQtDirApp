@@ -69,3 +69,79 @@ Widget::Widget(QWidget *parent)
 }
 
 Widget::~Widget() {}
+
+void Widget::refreshDir() {
+    dirListWidget->clear();
+
+    for (auto& item : dir->entryList())
+        dirListWidget->addItem(item);
+}
+
+void Widget::selectItem(QListWidgetItem* item) {
+    filenameLineEdit->setText(item->text());
+}
+
+void Widget::cpFile() {
+    QString filename = dir->absoluteFilePath(dirListWidget->currentItem()->text());
+    QFileInfo check(filename);
+
+    if (check.isFile() && filenameLineEdit->text().length()) {
+        QString newFile = dir->absoluteFilePath(filenameLineEdit->text());
+
+        if (filename != newFile)
+            QFile::copy(filename, newFile);
+            //qfile static 멤버 함수 -> singleton?
+    }
+
+    dir->refresh();
+    refreshDir();
+}
+
+void Widget::changeDir() {
+    QString filename = dir->absoluteFilePath(dirListWidget->currentItem()->text());
+    QFileInfo check(filename);
+
+    if (check.isDir()) {
+        dir->cd(filename);
+        dir->refresh();
+        refreshDir();
+    }
+}
+
+void Widget::mkDir() {
+    if ((filenameLineEdit->text().length() > 0) && (dirListWidget->currentItem() != NULL)) {
+        dir->mkdir(filenameLineEdit->text());
+        dir->refresh();
+        refreshDir();
+    }
+}
+
+void Widget::rmDir() {
+    if ((filenameLineEdit->text().length() > 0) && (dirListWidget->currentItem() != NULL)) {
+        QString filename = dir->absoluteFilePath(dirListWidget->currentItem()->text());
+        QFileInfo check(filename);
+
+        if (check.isDir())
+            dir->rmdir(filenameLineEdit->text());
+        else if (check.isFile())
+            QFile::remove(filename);
+
+        dir->refresh();
+        refreshDir();
+    }
+}
+
+void Widget::renameDir() {
+    if ((filenameLineEdit->text().length() < 0) || (dirListWidget->currentItem() == NULL))
+        return;
+
+    dir->rename(dirListWidget->currentItem()->text(), filenameLineEdit->text());
+    dir->refresh();
+    refreshDir();
+}
+
+// override
+void Widget::contextMenuEvent(QContextMenuEvent* event) {
+    QWidget::contextMenuEvent(event);
+    menu->exec(QCursor::pos());
+}
