@@ -22,7 +22,7 @@ protected:
 private:
     void refreshDir();
 
-    QDir *directory;
+    QDir *dir;
     QListWidget *dirListWidget;
     QLineEdit *filenameLineEdit;
     QTextEdit *outputEdit;
@@ -31,9 +31,9 @@ private:
 public slots:
     void selectItem(QListWidgetItem*);
     void changeDir();
-    void copyFile();
-    void makeDir();
-    void removeDir();
+    void cpFile();
+    void mkDir();
+    void rmDir();
     void renameDir();
 
 public:
